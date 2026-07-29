@@ -22,6 +22,7 @@ const navLinks = [
   { href: "/clients", label: "Clients" },
   { href: "/projects", label: "Projects" },
   { href: "/notes", label: "Notes" },
+  { href: "/calendar", label: "Calendar" },
 ];
 
 export default function RootLayout({

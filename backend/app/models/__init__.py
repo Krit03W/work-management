@@ -3,6 +3,7 @@ from app.models.project import Project, ProjectCategory, ProjectStatus
 from app.models.note import Note
 from app.models.quotation import Quotation, QuotationItem, QuotationStatus
 from app.models.requirement import RequirementDoc
+from app.models.google_account import GoogleAccount
 
 __all__ = [
     "Client",
@@ -14,4 +15,5 @@ __all__ = [
     "QuotationItem",
     "QuotationStatus",
     "RequirementDoc",
+    "GoogleAccount",
 ]

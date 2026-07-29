@@ -58,3 +58,18 @@ export interface Quotation {
   created_at: string;
   updated_at: string;
 }
+
+export interface CalendarStatus {
+  connected: boolean;
+  email: string | null;
+}
+
+export interface CalendarEvent {
+  id: string;
+  summary: string;
+  start: string;
+  end: string;
+  all_day: boolean;
+  location: string | null;
+  html_link: string | null;
+}
