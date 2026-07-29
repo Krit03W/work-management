@@ -21,13 +21,14 @@ docker-compose.yml   Full stack: db, backend, frontend
 
 ### Backend
 
+Requires [uv](https://docs.astral.sh/uv/).
+
 ```bash
 cd backend
-python3 -m venv .venv && source .venv/bin/activate
-pip install -r requirements.txt
+uv sync
 cp .env.example .env   # edit POSTGRES_* to point at a local Postgres
-alembic upgrade head
-uvicorn app.main:app --reload
+uv run alembic upgrade head
+uv run uvicorn app.main:app --reload
 ```
 
 API docs at http://localhost:8000/docs.
