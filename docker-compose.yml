@@ -28,8 +28,8 @@ services:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
       POSTGRES_DB: ${POSTGRES_DB:-work_management}
       CORS_ORIGINS: ${CORS_ORIGINS:-["http://localhost:3000"]}
-    ports:
-      - "8000:8000"
+    expose:
+      - "8000"
 
   frontend:
     build:
@@ -39,8 +39,8 @@ services:
     restart: unless-stopped
     depends_on:
       - backend
-    ports:
-      - "3000:3000"
+    expose:
+      - "3000"
 
 volumes:
   db_data:
