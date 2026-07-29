@@ -1,11 +1,23 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Briefcase, Plus, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
+import { Card } from "@/components/card";
+import { buttonStyles, dangerLinkStyles, inputStyles } from "@/components/ui";
 import type { Client, Project, ProjectCategory, ProjectStatus } from "@/types";
 
 const categories: ProjectCategory[] = ["full_time", "freelance", "solopreneur"];
 const statuses: ProjectStatus[] = ["lead", "quoted", "in_progress", "completed", "archived"];
+
+const statusDot: Record<ProjectStatus, string> = {
+  lead: "bg-zinc-400",
+  quoted: "bg-amber-400",
+  in_progress: "bg-accent",
+  completed: "bg-emerald-400",
+  archived: "bg-zinc-300 dark:bg-zinc-600",
+};
 
 const emptyForm = {
   name: "",
@@ -77,112 +89,127 @@ export default function ProjectsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <h1 className="text-xl font-semibold">Projects</h1>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-xl font-semibold tracking-tight">Projects</h1>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 rounded border border-black/10 p-4 dark:border-white/10">
-        <input
-          className="col-span-2 rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          placeholder="Project name *"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          required
-        />
-        <select
-          className="rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          value={form.client_id}
-          onChange={(e) => setForm({ ...form, client_id: e.target.value })}
-        >
-          <option value="">No client</option>
-          {clients.map((c) => (
-            <option key={c.id} value={c.id}>
-              {c.name}
-            </option>
-          ))}
-        </select>
-        <select
-          className="rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          value={form.category}
-          onChange={(e) => setForm({ ...form, category: e.target.value as ProjectCategory })}
-        >
-          {categories.map((c) => (
-            <option key={c} value={c}>
-              {c}
-            </option>
-          ))}
-        </select>
-        <select
-          className="rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          value={form.status}
-          onChange={(e) => setForm({ ...form, status: e.target.value as ProjectStatus })}
-        >
-          {statuses.map((s) => (
-            <option key={s} value={s}>
-              {s}
-            </option>
-          ))}
-        </select>
-        <input
-          type="date"
-          className="rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          value={form.deadline}
-          onChange={(e) => setForm({ ...form, deadline: e.target.value })}
-        />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="col-span-2 rounded bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-        >
-          {submitting ? "Adding..." : "Add project"}
-        </button>
-      </form>
-
-      {error && <p className="text-sm text-red-600">{error}</p>}
-
-      {loading ? (
-        <p className="text-sm text-black/60 dark:text-white/60">Loading...</p>
-      ) : (
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-black/10 dark:border-white/10">
-              <th className="py-2 pr-4">Name</th>
-              <th className="py-2 pr-4">Client</th>
-              <th className="py-2 pr-4">Category</th>
-              <th className="py-2 pr-4">Status</th>
-              <th className="py-2 pr-4">Deadline</th>
-              <th className="py-2 pr-4"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {projects.map((p) => (
-              <tr key={p.id} className="border-b border-black/5 dark:border-white/5">
-                <td className="py-2 pr-4">{p.name}</td>
-                <td className="py-2 pr-4">{clientName(p.client_id)}</td>
-                <td className="py-2 pr-4">{p.category}</td>
-                <td className="py-2 pr-4">
-                  <select
-                    className="rounded border border-black/20 bg-transparent px-2 py-1 text-xs dark:border-white/20"
-                    value={p.status}
-                    onChange={(e) => handleStatusChange(p.id, e.target.value as ProjectStatus)}
-                  >
-                    {statuses.map((s) => (
-                      <option key={s} value={s}>
-                        {s}
-                      </option>
-                    ))}
-                  </select>
-                </td>
-                <td className="py-2 pr-4">{p.deadline ?? "-"}</td>
-                <td className="py-2 pr-4">
-                  <button onClick={() => handleDelete(p.id)} className="text-red-600 hover:underline">
-                    Delete
-                  </button>
-                </td>
-              </tr>
+      <Card>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <input
+            className={`${inputStyles} sm:col-span-2`}
+            placeholder="Project name *"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
+          <select
+            className={inputStyles}
+            value={form.client_id}
+            onChange={(e) => setForm({ ...form, client_id: e.target.value })}
+          >
+            <option value="">No client</option>
+            {clients.map((c) => (
+              <option key={c.id} value={c.id}>
+                {c.name}
+              </option>
             ))}
-          </tbody>
-        </table>
-      )}
+          </select>
+          <select
+            className={inputStyles}
+            value={form.category}
+            onChange={(e) => setForm({ ...form, category: e.target.value as ProjectCategory })}
+          >
+            {categories.map((c) => (
+              <option key={c} value={c}>
+                {c}
+              </option>
+            ))}
+          </select>
+          <select
+            className={inputStyles}
+            value={form.status}
+            onChange={(e) => setForm({ ...form, status: e.target.value as ProjectStatus })}
+          >
+            {statuses.map((s) => (
+              <option key={s} value={s}>
+                {s}
+              </option>
+            ))}
+          </select>
+          <input
+            type="date"
+            className={inputStyles}
+            value={form.deadline}
+            onChange={(e) => setForm({ ...form, deadline: e.target.value })}
+          />
+          <button type="submit" disabled={submitting} className={`${buttonStyles} sm:col-span-2 justify-center`}>
+            <Plus size={14} />
+            {submitting ? "Adding..." : "Add project"}
+          </button>
+        </form>
+      </Card>
+
+      {error && <p className="text-sm text-red-500">{error}</p>}
+
+      <Card delay={0.05} className="p-0">
+        {loading ? (
+          <p className="p-5 text-sm text-muted">Loading...</p>
+        ) : projects.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 p-10 text-center text-sm text-muted">
+            <Briefcase size={20} className="text-muted" />
+            No projects yet.
+          </div>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-border text-muted">
+                <th className="px-5 py-3 font-medium">Name</th>
+                <th className="px-5 py-3 font-medium">Client</th>
+                <th className="px-5 py-3 font-medium">Category</th>
+                <th className="px-5 py-3 font-medium">Status</th>
+                <th className="px-5 py-3 font-medium">Deadline</th>
+                <th className="px-5 py-3"></th>
+              </tr>
+            </thead>
+            <tbody>
+              {projects.map((p, i) => (
+                <motion.tr
+                  key={p.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.25, delay: i * 0.03 }}
+                  className="border-b border-border/60 last:border-0"
+                >
+                  <td className="px-5 py-3">{p.name}</td>
+                  <td className="px-5 py-3 text-muted">{clientName(p.client_id)}</td>
+                  <td className="px-5 py-3 text-muted">{p.category}</td>
+                  <td className="px-5 py-3">
+                    <div className="flex items-center gap-2">
+                      <span className={`h-1.5 w-1.5 rounded-full ${statusDot[p.status]}`} />
+                      <select
+                        className="rounded-lg border border-border bg-background px-2 py-1 text-xs outline-none transition-colors focus:border-accent"
+                        value={p.status}
+                        onChange={(e) => handleStatusChange(p.id, e.target.value as ProjectStatus)}
+                      >
+                        {statuses.map((s) => (
+                          <option key={s} value={s}>
+                            {s}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </td>
+                  <td className="px-5 py-3 text-muted">{p.deadline ?? "-"}</td>
+                  <td className="px-5 py-3">
+                    <button onClick={() => handleDelete(p.id)} className={dangerLinkStyles} aria-label="Delete project">
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
     </div>
   );
 }

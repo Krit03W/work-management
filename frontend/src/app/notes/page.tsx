@@ -1,7 +1,10 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { NotebookPen, Plus, Trash2 } from "lucide-react";
 import { api } from "@/lib/api";
+import { Card } from "@/components/card";
+import { buttonStyles, dangerLinkStyles, inputStyles } from "@/components/ui";
 import type { Note, Project } from "@/types";
 
 const emptyForm = { title: "", content: "", project_id: "" };
@@ -61,68 +64,78 @@ export default function NotesPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <h1 className="text-xl font-semibold">Notes</h1>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-xl font-semibold tracking-tight">Notes</h1>
 
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3 rounded border border-black/10 p-4 dark:border-white/10">
-        <div className="flex gap-3">
-          <input
-            className="flex-1 rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-            placeholder="Title (optional)"
-            value={form.title}
-            onChange={(e) => setForm({ ...form, title: e.target.value })}
+      <Card>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-3">
+          <div className="flex flex-col gap-3 sm:flex-row">
+            <input
+              className={`${inputStyles} sm:flex-1`}
+              placeholder="Title (optional)"
+              value={form.title}
+              onChange={(e) => setForm({ ...form, title: e.target.value })}
+            />
+            <select
+              className={`${inputStyles} sm:w-56`}
+              value={form.project_id}
+              onChange={(e) => setForm({ ...form, project_id: e.target.value })}
+            >
+              <option value="">Unassigned</option>
+              {projects.map((p) => (
+                <option key={p.id} value={p.id}>
+                  {p.name}
+                </option>
+              ))}
+            </select>
+          </div>
+          <textarea
+            className={inputStyles}
+            placeholder="Note content *"
+            rows={3}
+            value={form.content}
+            onChange={(e) => setForm({ ...form, content: e.target.value })}
+            required
           />
-          <select
-            className="rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-            value={form.project_id}
-            onChange={(e) => setForm({ ...form, project_id: e.target.value })}
-          >
-            <option value="">Unassigned</option>
-            {projects.map((p) => (
-              <option key={p.id} value={p.id}>
-                {p.name}
-              </option>
-            ))}
-          </select>
-        </div>
-        <textarea
-          className="rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          placeholder="Note content *"
-          rows={3}
-          value={form.content}
-          onChange={(e) => setForm({ ...form, content: e.target.value })}
-          required
-        />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="self-start rounded bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-        >
-          {submitting ? "Saving..." : "Add note"}
-        </button>
-      </form>
+          <button type="submit" disabled={submitting} className={`${buttonStyles} self-start`}>
+            <Plus size={14} />
+            {submitting ? "Saving..." : "Add note"}
+          </button>
+        </form>
+      </Card>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
       {loading ? (
-        <p className="text-sm text-black/60 dark:text-white/60">Loading...</p>
+        <p className="text-sm text-muted">Loading...</p>
+      ) : notes.length === 0 ? (
+        <Card delay={0.05} className="flex flex-col items-center gap-2 text-center text-sm text-muted">
+          <NotebookPen size={20} className="text-muted" />
+          No notes yet.
+        </Card>
       ) : (
-        <ul className="flex flex-col gap-3">
-          {notes.map((n) => (
-            <li key={n.id} className="rounded border border-black/10 p-4 dark:border-white/10">
-              <div className="mb-1 flex items-center justify-between">
+        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {notes.map((n, i) => (
+            <Card key={n.id} delay={0.03 * i} className="flex flex-col gap-2">
+              <div className="flex items-start justify-between gap-2">
                 <span className="font-medium">{n.title ?? "Untitled"}</span>
-                <div className="flex items-center gap-3 text-xs text-black/60 dark:text-white/60">
-                  {projectName(n.project_id) && <span>{projectName(n.project_id)}</span>}
-                  <button onClick={() => handleDelete(n.id)} className="text-red-600 hover:underline">
-                    Delete
-                  </button>
-                </div>
+                <button
+                  onClick={() => handleDelete(n.id)}
+                  className={dangerLinkStyles}
+                  aria-label="Delete note"
+                >
+                  <Trash2 size={13} />
+                </button>
               </div>
-              <p className="whitespace-pre-wrap text-sm">{n.content}</p>
-            </li>
+              <p className="whitespace-pre-wrap text-sm text-foreground/80">{n.content}</p>
+              {projectName(n.project_id) && (
+                <span className="mt-auto w-fit rounded-full bg-accent/10 px-2 py-0.5 text-xs text-accent">
+                  {projectName(n.project_id)}
+                </span>
+              )}
+            </Card>
           ))}
-        </ul>
+        </div>
       )}
     </div>
   );

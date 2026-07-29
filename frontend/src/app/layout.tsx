@@ -1,6 +1,9 @@
 import type { Metadata } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
+import { ThemeProvider } from "@/components/theme-provider";
+import { ThemeToggle } from "@/components/theme-toggle";
+import { Nav } from "@/components/nav";
 
 const geistSans = Geist({
   variable: "--font-geist-sans",
@@ -17,14 +20,6 @@ export const metadata: Metadata = {
   description: "Personal work management: clients, projects, quotations, notes",
 };
 
-const navLinks = [
-  { href: "/", label: "Dashboard" },
-  { href: "/clients", label: "Clients" },
-  { href: "/projects", label: "Projects" },
-  { href: "/notes", label: "Notes" },
-  { href: "/calendar", label: "Calendar" },
-];
-
 export default function RootLayout({
   children,
 }: Readonly<{
@@ -33,20 +28,23 @@ export default function RootLayout({
   return (
     <html
       lang="en"
+      suppressHydrationWarning
       className={`${geistSans.variable} ${geistMono.variable} h-full antialiased`}
     >
-      <body className="min-h-full flex flex-col">
-        <header className="border-b border-black/10 dark:border-white/10">
-          <nav className="mx-auto max-w-5xl flex items-center gap-6 px-6 py-4">
-            <span className="font-semibold">Work Management</span>
-            {navLinks.map((link) => (
-              <a key={link.href} href={link.href} className="text-sm hover:underline">
-                {link.label}
-              </a>
-            ))}
-          </nav>
-        </header>
-        <main className="mx-auto w-full max-w-5xl flex-1 px-6 py-8">{children}</main>
+      <body className="flex min-h-full flex-col bg-background text-foreground">
+        <ThemeProvider>
+          <header className="sticky top-0 z-10 border-b border-border/80 bg-background/80 backdrop-blur-sm">
+            <div className="mx-auto flex max-w-6xl items-center justify-between px-6 py-3">
+              <span className="text-sm font-semibold tracking-tight">Work Management</span>
+              <div className="flex items-center gap-3">
+                <Nav />
+                <div className="h-4 w-px bg-border" />
+                <ThemeToggle />
+              </div>
+            </div>
+          </header>
+          <main className="mx-auto w-full max-w-6xl flex-1 px-6 py-8">{children}</main>
+        </ThemeProvider>
       </body>
     </html>
   );

@@ -1,7 +1,11 @@
 "use client";
 
 import { useEffect, useState } from "react";
+import { motion } from "framer-motion";
+import { Plus, Trash2, Users } from "lucide-react";
 import { api } from "@/lib/api";
+import { Card } from "@/components/card";
+import { buttonStyles, dangerLinkStyles, inputStyles } from "@/components/ui";
 import type { Client } from "@/types";
 
 const emptyForm = { name: "", company: "", email: "", phone: "" };
@@ -57,76 +61,88 @@ export default function ClientsPage() {
   };
 
   return (
-    <div className="flex flex-col gap-8">
-      <h1 className="text-xl font-semibold">Clients</h1>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-xl font-semibold tracking-tight">Clients</h1>
 
-      <form onSubmit={handleSubmit} className="grid grid-cols-2 gap-3 rounded border border-black/10 p-4 dark:border-white/10">
-        <input
-          className="rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          placeholder="Name *"
-          value={form.name}
-          onChange={(e) => setForm({ ...form, name: e.target.value })}
-          required
-        />
-        <input
-          className="rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          placeholder="Company"
-          value={form.company}
-          onChange={(e) => setForm({ ...form, company: e.target.value })}
-        />
-        <input
-          className="rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          placeholder="Email"
-          value={form.email}
-          onChange={(e) => setForm({ ...form, email: e.target.value })}
-        />
-        <input
-          className="rounded border border-black/20 px-3 py-2 text-sm dark:border-white/20 dark:bg-transparent"
-          placeholder="Phone"
-          value={form.phone}
-          onChange={(e) => setForm({ ...form, phone: e.target.value })}
-        />
-        <button
-          type="submit"
-          disabled={submitting}
-          className="col-span-2 rounded bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-        >
-          {submitting ? "Adding..." : "Add client"}
-        </button>
-      </form>
+      <Card>
+        <form onSubmit={handleSubmit} className="grid grid-cols-1 gap-3 sm:grid-cols-2">
+          <input
+            className={inputStyles}
+            placeholder="Name *"
+            value={form.name}
+            onChange={(e) => setForm({ ...form, name: e.target.value })}
+            required
+          />
+          <input
+            className={inputStyles}
+            placeholder="Company"
+            value={form.company}
+            onChange={(e) => setForm({ ...form, company: e.target.value })}
+          />
+          <input
+            className={inputStyles}
+            placeholder="Email"
+            value={form.email}
+            onChange={(e) => setForm({ ...form, email: e.target.value })}
+          />
+          <input
+            className={inputStyles}
+            placeholder="Phone"
+            value={form.phone}
+            onChange={(e) => setForm({ ...form, phone: e.target.value })}
+          />
+          <button type="submit" disabled={submitting} className={`${buttonStyles} sm:col-span-2 justify-center`}>
+            <Plus size={14} />
+            {submitting ? "Adding..." : "Add client"}
+          </button>
+        </form>
+      </Card>
 
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
-      {loading ? (
-        <p className="text-sm text-black/60 dark:text-white/60">Loading...</p>
-      ) : (
-        <table className="w-full text-left text-sm">
-          <thead>
-            <tr className="border-b border-black/10 dark:border-white/10">
-              <th className="py-2 pr-4">Name</th>
-              <th className="py-2 pr-4">Company</th>
-              <th className="py-2 pr-4">Email</th>
-              <th className="py-2 pr-4">Phone</th>
-              <th className="py-2 pr-4"></th>
-            </tr>
-          </thead>
-          <tbody>
-            {clients.map((c) => (
-              <tr key={c.id} className="border-b border-black/5 dark:border-white/5">
-                <td className="py-2 pr-4">{c.name}</td>
-                <td className="py-2 pr-4">{c.company ?? "-"}</td>
-                <td className="py-2 pr-4">{c.email ?? "-"}</td>
-                <td className="py-2 pr-4">{c.phone ?? "-"}</td>
-                <td className="py-2 pr-4">
-                  <button onClick={() => handleDelete(c.id)} className="text-red-600 hover:underline">
-                    Delete
-                  </button>
-                </td>
+      <Card delay={0.05} className="p-0">
+        {loading ? (
+          <p className="p-5 text-sm text-muted">Loading...</p>
+        ) : clients.length === 0 ? (
+          <div className="flex flex-col items-center gap-2 p-10 text-center text-sm text-muted">
+            <Users size={20} className="text-muted" />
+            No clients yet.
+          </div>
+        ) : (
+          <table className="w-full text-left text-sm">
+            <thead>
+              <tr className="border-b border-border text-muted">
+                <th className="px-5 py-3 font-medium">Name</th>
+                <th className="px-5 py-3 font-medium">Company</th>
+                <th className="px-5 py-3 font-medium">Email</th>
+                <th className="px-5 py-3 font-medium">Phone</th>
+                <th className="px-5 py-3"></th>
               </tr>
-            ))}
-          </tbody>
-        </table>
-      )}
+            </thead>
+            <tbody>
+              {clients.map((c, i) => (
+                <motion.tr
+                  key={c.id}
+                  initial={{ opacity: 0 }}
+                  animate={{ opacity: 1 }}
+                  transition={{ duration: 0.25, delay: i * 0.03 }}
+                  className="border-b border-border/60 last:border-0"
+                >
+                  <td className="px-5 py-3">{c.name}</td>
+                  <td className="px-5 py-3 text-muted">{c.company ?? "-"}</td>
+                  <td className="px-5 py-3 text-muted">{c.email ?? "-"}</td>
+                  <td className="px-5 py-3 text-muted">{c.phone ?? "-"}</td>
+                  <td className="px-5 py-3">
+                    <button onClick={() => handleDelete(c.id)} className={dangerLinkStyles} aria-label="Delete client">
+                      <Trash2 size={14} />
+                    </button>
+                  </td>
+                </motion.tr>
+              ))}
+            </tbody>
+          </table>
+        )}
+      </Card>
     </div>
   );
 }

@@ -2,7 +2,11 @@
 
 import { Suspense, useEffect, useState } from "react";
 import { useSearchParams } from "next/navigation";
+import { motion } from "framer-motion";
+import { CalendarDays, CalendarPlus } from "lucide-react";
 import { api } from "@/lib/api";
+import { Card } from "@/components/card";
+import { buttonStyles, dangerLinkStyles } from "@/components/ui";
 import type { CalendarEvent, CalendarStatus } from "@/types";
 
 function groupByDate(items: CalendarEvent[]) {
@@ -65,61 +69,62 @@ function CalendarPageInner() {
     reload();
   };
 
-  if (loading) return <p className="text-sm text-black/60 dark:text-white/60">Loading...</p>;
+  if (loading) return <p className="text-sm text-muted">Loading...</p>;
 
   return (
-    <div className="flex flex-col gap-8">
-      <h1 className="text-xl font-semibold">Calendar</h1>
+    <div className="flex flex-col gap-6">
+      <h1 className="text-xl font-semibold tracking-tight">Calendar</h1>
 
-      {urlError && <p className="text-sm text-red-600">Google connection failed: {urlError}</p>}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {urlError && <p className="text-sm text-red-500">Google connection failed: {urlError}</p>}
+      {error && <p className="text-sm text-red-500">{error}</p>}
 
       {!status?.connected ? (
-        <div className="rounded border border-black/10 p-4 dark:border-white/10">
-          <p className="mb-3 text-sm text-black/60 dark:text-white/60">
+        <Card className="flex flex-col items-center gap-3 py-10 text-center">
+          <CalendarPlus size={22} className="text-accent" />
+          <p className="max-w-xs text-sm text-muted">
             Connect your Google Calendar to see upcoming events alongside project deadlines.
           </p>
-          <button
-            onClick={handleConnect}
-            disabled={connecting}
-            className="rounded bg-foreground px-4 py-2 text-sm font-medium text-background disabled:opacity-50"
-          >
+          <button onClick={handleConnect} disabled={connecting} className={buttonStyles}>
             {connecting ? "Redirecting..." : "Connect Google Calendar"}
           </button>
-        </div>
+        </Card>
       ) : (
         <div className="flex flex-col gap-4">
-          <div className="flex items-center justify-between rounded border border-black/10 px-4 py-2 text-sm dark:border-white/10">
-            <span>Connected as {status.email}</span>
-            <button onClick={handleDisconnect} className="text-red-600 hover:underline">
+          <Card className="flex items-center justify-between py-3">
+            <span className="text-sm">Connected as {status.email}</span>
+            <button onClick={handleDisconnect} className={dangerLinkStyles}>
               Disconnect
             </button>
-          </div>
+          </Card>
 
           {events.length === 0 ? (
-            <p className="text-sm text-black/60 dark:text-white/60">No upcoming events in the next 30 days.</p>
+            <Card delay={0.05} className="flex flex-col items-center gap-2 py-10 text-center text-sm text-muted">
+              <CalendarDays size={20} className="text-muted" />
+              No upcoming events in the next 30 days.
+            </Card>
           ) : (
-            groupByDate(events).map(([date, items]) => (
+            groupByDate(events).map(([date, items], gi) => (
               <div key={date}>
-                <h2 className="mb-2 text-sm font-medium text-black/60 dark:text-white/60">{date}</h2>
+                <h2 className="mb-2 text-sm font-medium text-muted">{date}</h2>
                 <ul className="flex flex-col gap-2">
-                  {items.map((e) => (
-                    <li
+                  {items.map((e, i) => (
+                    <motion.li
                       key={e.id}
-                      className="rounded border border-black/10 px-4 py-2 text-sm dark:border-white/10"
+                      initial={{ opacity: 0, y: 6 }}
+                      animate={{ opacity: 1, y: 0 }}
+                      transition={{ duration: 0.25, delay: gi * 0.05 + i * 0.03 }}
+                      className="rounded-xl border border-border bg-card px-4 py-2.5 text-sm"
                     >
                       <div className="flex items-center justify-between">
                         <span>{e.summary}</span>
                         {!e.all_day && (
-                          <span className="text-black/60 dark:text-white/60">
+                          <span className="text-muted">
                             {new Date(e.start).toLocaleTimeString([], { hour: "2-digit", minute: "2-digit" })}
                           </span>
                         )}
                       </div>
-                      {e.location && (
-                        <div className="text-xs text-black/50 dark:text-white/50">{e.location}</div>
-                      )}
-                    </li>
+                      {e.location && <div className="text-xs text-muted">{e.location}</div>}
+                    </motion.li>
                   ))}
                 </ul>
               </div>
@@ -133,7 +138,7 @@ function CalendarPageInner() {
 
 export default function CalendarPage() {
   return (
-    <Suspense fallback={<p className="text-sm text-black/60 dark:text-white/60">Loading...</p>}>
+    <Suspense fallback={<p className="text-sm text-muted">Loading...</p>}>
       <CalendarPageInner />
     </Suspense>
   );
